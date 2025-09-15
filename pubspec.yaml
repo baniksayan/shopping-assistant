@@ -26,6 +26,7 @@ dev_dependencies:
 
 flutter:
 
+  assets:
+    - assets/top_brands/logos/
 
   uses-material-design: true
-
