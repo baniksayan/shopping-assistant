@@ -1,8 +1,10 @@
+// FILE PATH: lib/main.dart
 import 'package:flutter/material.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/otp_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/main_navigation_screen.dart';
 
 void main() {
   runApp(const FutureFoundersApp());
@@ -17,21 +19,18 @@ class FutureFoundersApp extends StatelessWidget {
       title: 'FutureFounders',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        brightness: Brightness.dark, // Set a base dark theme
+        brightness: Brightness.dark,
         fontFamily: 'System',
-        scaffoldBackgroundColor: Colors.black, // Set global background
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+        scaffoldBackgroundColor: Colors.black,
       ),
-      // Define named routes for easy navigation
       initialRoute: '/',
       routes: {
         '/': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginScreen(),
-        '/otp': (context) => const OTPScreen(phoneNumber: '87XXXXXX832'), // Example phone number
+        '/otp': (context) => const OTPScreen(phoneNumber: '87XXXXXX832'),
         '/profile': (context) => const ProfileScreen(),
+        '/home': (context) => const MainNavigationScreen(),
       },
-      // Handle route generation for dynamic parameters
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/otp':

@@ -1,3 +1,5 @@
+// FILE PATH: lib/screens/profile_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/auth_app_bar.dart';
@@ -16,7 +18,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _lastNameCtrl = TextEditingController();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _dobCtrl = TextEditingController();
-
   bool _isLoading = false;
   bool _isFormValid = false;
   bool _submitted = false;
@@ -46,8 +47,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final lastNameValid = _lastNameCtrl.text.trim().isEmpty || RegExp(r'^[A-Za-z]+$').hasMatch(_lastNameCtrl.text.trim());
     final dobValid = _dobCtrl.text.trim().length == 10; // DD/MM/YYYY
     final genderValid = (_gender != null && _gender!.isNotEmpty);
-
     final valid = emailValid && firstNameValid && lastNameValid && dobValid && genderValid;
+    
     if (valid != _isFormValid) {
       setState(() => _isFormValid = valid);
     }
@@ -63,11 +64,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _submitProfile() {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
+    
     Future.delayed(const Duration(seconds: 2), () {
-      // After submission navigate back to onboarding (root) as requested
-      debugPrint("Profile submitted! Navigating to Onboarding...");
-      if (!mounted) return; // avoid using context across async gap
-      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      if (!mounted) return;
+      
+      // Navigate to Main Navigation Screen (with tabs)
+      Navigator.pushReplacementNamed(context, '/home');
     });
   }
 
@@ -250,7 +252,7 @@ class _DateTextInputFormatter extends TextInputFormatter {
       TextEditingValue oldValue, TextEditingValue newValue) {
     var digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.length > 8) digits = digits.substring(0, 8);
-
+    
     final buffer = StringBuffer();
     for (var i = 0; i < digits.length; i++) {
       buffer.write(digits[i]);
@@ -258,9 +260,11 @@ class _DateTextInputFormatter extends TextInputFormatter {
         if (i != digits.length - 1) buffer.write('/');
       }
     }
+    
     final formatted = buffer.toString();
     // Calculate new cursor position
     var selectionIndex = formatted.length;
+    
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: selectionIndex),
