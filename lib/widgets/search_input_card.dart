@@ -26,10 +26,10 @@ class SearchInputCard extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
-              style: const TextStyle(color: AppColors.primaryText),
+              style: TextStyle(color: AppColors.primaryText),
               decoration: InputDecoration(
                 hintText: AppStrings.homeSearchHint,
-                hintStyle: const TextStyle(color: AppColors.secondaryText),
+                hintStyle: TextStyle(color: AppColors.secondaryText),
                 border: InputBorder.none,
               ),
               textInputAction: TextInputAction.search,

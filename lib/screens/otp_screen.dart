@@ -3,9 +3,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../constants/app_colors.dart';
 import '../widgets/auth_app_bar.dart';
-// replaced CustomTextField with an inline TextField to enforce controller + limit
 import '../widgets/primary_button.dart';
+import '../services/user_data_service.dart';
 
 class OTPScreen extends StatefulWidget {
   final String phoneNumber;
@@ -124,7 +125,20 @@ class _OTPScreenState extends State<OTPScreen> {
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+      
+      // Check if user is already registered
+      if (UserDataService.isUserRegistered) {
+        // User exists, go directly to home
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      } else {
+        // New user, go to profile creation
+        Navigator.pushNamedAndRemoveUntil(
+          context, 
+          '/profile-creation', 
+          (route) => false,
+          arguments: {'phoneNumber': widget.phoneNumber},
+        );
+      }
     });
   }
 
@@ -145,6 +159,7 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: const AuthAppBar(title: 'OTP Verification'),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -153,10 +168,10 @@ class _OTPScreenState extends State<OTPScreen> {
           children: [
             Text(
               "We've sent an OTP to verify ${widget.phoneNumber}",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.primaryText,
               ),
             ),
             const SizedBox(height: 20),
@@ -168,15 +183,25 @@ class _OTPScreenState extends State<OTPScreen> {
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(6),
               ],
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: AppColors.primaryText, fontSize: 16),
               decoration: InputDecoration(
                 hintText: 'Enter your 6 Digit OTP',
-                hintStyle: const TextStyle(color: Color(0xFF7D7D7D)),
+                hintStyle: TextStyle(color: AppColors.hintText),
                 filled: true,
-                fillColor: const Color(0xFF2C2C2E),
-                border: const OutlineInputBorder(borderSide: BorderSide.none),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                fillColor: AppColors.inputFillColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.inputBorderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.inputBorderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.inputFocusedBorderColor, width: 2),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               ),
             ),
             const SizedBox(height: 20),

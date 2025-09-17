@@ -15,9 +15,7 @@ class GradientBackground extends StatelessWidget {
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        gradient: isDarkMode
-            ? AppColors.darkBackgroundGradient
-            : AppColors.lightBackgroundGradient,
+        gradient: AppColors.backgroundGradient,
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../constants/app_colors.dart';
 import '../widgets/auth_app_bar.dart';
-// removed unused import
 import '../widgets/primary_button.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -67,18 +67,19 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: const AuthAppBar(title: 'Login/Signup'),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Verify your phone number.',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.primaryText,
               ),
             ),
             const SizedBox(height: 20),
@@ -97,25 +98,33 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 focusNode: _phoneFocus,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(color: AppColors.primaryText, fontSize: 16),
                 decoration: InputDecoration(
                   hintText: '8768412832',
-                  hintStyle: const TextStyle(color: Color(0xFF7D7D7D)),
+                  hintStyle: TextStyle(color: AppColors.hintText),
                   filled: true,
-                  fillColor: const Color(0xFF2C2C2E),
+                  fillColor: AppColors.inputFillColor,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: AppColors.inputBorderColor),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.inputBorderColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.inputFocusedBorderColor, width: 2),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                   prefixIcon: _showCountryPrefix
-                      ? const Padding(
-                          padding: EdgeInsets.only(left: 12, right: 8),
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 12, right: 8),
                           child: Center(
                             widthFactor: 1,
                             child: Text(
                               '+91',
-                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                              style: TextStyle(color: AppColors.primaryText, fontSize: 16, fontWeight: FontWeight.w600),
                             ),
                           ),
                         )
@@ -134,18 +143,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             const Spacer(),
             RichText(
               textAlign: TextAlign.center,
-              text: const TextSpan(
-                style: TextStyle(color: Color(0xFF8E8E93), fontSize: 13),
+              text: TextSpan(
+                style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
                 children: [
-                  TextSpan(text: 'By continuing, you agree to our '),
+                  const TextSpan(text: 'By continuing, you agree to our '),
                   TextSpan(
                     text: 'Terms of Service',
-                    style: TextStyle(decoration: TextDecoration.underline),
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      color: AppColors.primaryBlue,
+                    ),
                   ),
-                  TextSpan(text: ' and '),
+                  const TextSpan(text: ' and '),
                   TextSpan(
                     text: 'Privacy Policy.',
-                    style: TextStyle(decoration: TextDecoration.underline),
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      color: AppColors.primaryBlue,
+                    ),
                   ),
                 ],
               ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_dimensions.dart';
 import '../constants/app_strings.dart';
+import '../services/user_data_service.dart';
 
 class UserBalanceCard extends StatelessWidget {
   const UserBalanceCard({Key? key}) : super(key: key);
@@ -27,15 +28,17 @@ class UserBalanceCard extends StatelessWidget {
               CircleAvatar(
                 radius: AppDimensions.userAvatarSize / 2,
                 backgroundColor: AppColors.profileIconBackground,
-                child: const Icon(
+                child: Icon(
                   Icons.person,
                   color: AppColors.primaryText,
                   size: 20,
                 ),
               ),
               const SizedBox(width: 10),
-              const Text(
-                AppStrings.homeGreeting,
+              Text(
+                UserDataService.firstName.isNotEmpty 
+                    ? 'Hi ${UserDataService.firstName}' 
+                    : 'Hi User',
                 style: TextStyle(
                   color: AppColors.primaryText,
                   fontSize: 16,
@@ -63,7 +66,7 @@ class UserBalanceCard extends StatelessWidget {
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 AppStrings.homeBalance,
                 style: TextStyle(
                   color: AppColors.primaryText,

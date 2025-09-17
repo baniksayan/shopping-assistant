@@ -20,27 +20,31 @@ class CategoryIconWidget extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.cardBackground,
+              color: AppColors.categoryIconBackground,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.borderColor.withOpacity(0.1),
+              ),
             ),
             child: Center(
               child: Text(
                 emoji,
-                style: const TextStyle(fontSize: 32),
+                style: const TextStyle(fontSize: 28),
               ),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              color: AppColors.primaryText,
-              fontSize: 14,
+            style: TextStyle(
+              color: AppColors.categoryLabelColor,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,

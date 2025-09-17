@@ -123,8 +123,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: _ctrl,
-                    style: const TextStyle(color: AppColors.primaryText),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: AppColors.primaryText),
+                    decoration: InputDecoration(
                       hintText: 'Compare e.g. "₹10,000 laptop"',
                       hintStyle: TextStyle(color: AppColors.secondaryText),
                       border: InputBorder.none,

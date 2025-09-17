@@ -51,7 +51,7 @@ class BrandGridCard extends StatelessWidget {
             ),
             child: Text(
               discount,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.primaryText,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

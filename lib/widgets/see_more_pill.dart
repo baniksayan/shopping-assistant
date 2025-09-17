@@ -16,7 +16,7 @@ class SeeMorePill extends StatelessWidget {
           color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(32),
         ),
-        child: const Icon(Icons.arrow_forward_ios, color: AppColors.primaryText, size: 20),
+        child: Icon(Icons.arrow_forward_ios, color: AppColors.primaryText, size: 20),
       ),
     );
   }

@@ -33,7 +33,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: Container(
         height: 80,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.background,
           border: Border(
             top: BorderSide(color: AppColors.cardBackground, width: 1),

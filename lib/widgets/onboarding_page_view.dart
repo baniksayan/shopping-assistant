@@ -47,7 +47,7 @@ class OnboardingPageView extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 content.pillText,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.primaryText,
                   fontSize: AppDimensions.pillFontSize,
                   fontWeight: FontWeight.w600,
@@ -62,7 +62,7 @@ class OnboardingPageView extends StatelessWidget {
         Text(
           content.headline,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.primaryText,
             fontSize: AppDimensions.headlineFontSize,
             fontWeight: FontWeight.bold,

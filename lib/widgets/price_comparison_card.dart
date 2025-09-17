@@ -32,7 +32,7 @@ class PriceComparisonCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             productName,
-            style: const TextStyle(color: AppColors.primaryText, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppColors.primaryText, fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Column(

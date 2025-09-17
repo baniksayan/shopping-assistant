@@ -13,17 +13,17 @@ class SearchBarWidget extends StatelessWidget {
     return Container(
       height: AppDimensions.searchBarHeight,
       decoration: BoxDecoration(
-        color: AppColors.searchBarBackground,
+        color: AppColors.searchBackground,
         borderRadius: BorderRadius.circular(AppDimensions.searchBarRadius),
       ),
       child: Row(
         children: [
           const SizedBox(width: 20),
-          const Expanded(
+          Expanded(
             child: Text(
               AppStrings.homeSearchHint,
               style: TextStyle(
-                color: AppColors.searchBarHint,
+                color: AppColors.hintText,
                 fontSize: 16,
               ),
             ),
@@ -31,7 +31,7 @@ class SearchBarWidget extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(right: 8),
             padding: const EdgeInsets.all(8),
-            child: const Icon(
+            child: Icon(
               Icons.send,
               color: AppColors.primaryText,
               size: 20,

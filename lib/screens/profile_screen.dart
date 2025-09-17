@@ -1,273 +1,589 @@
-// FILE PATH: lib/screens/profile_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../widgets/auth_app_bar.dart';
-import '../widgets/primary_button.dart';
+import '../constants/app_colors.dart';
+import '../constants/app_dimensions.dart';
+import '../services/theme_service.dart';
+import '../services/user_data_service.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class ProfileViewScreen extends StatefulWidget {
+  final VoidCallback? onThemeChanged;
+  
+  const ProfileViewScreen({Key? key, this.onThemeChanged}) : super(key: key);
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileViewScreen> createState() => _ProfileViewScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _firstNameCtrl = TextEditingController();
-  final TextEditingController _lastNameCtrl = TextEditingController();
-  final TextEditingController _emailCtrl = TextEditingController();
-  final TextEditingController _dobCtrl = TextEditingController();
-  bool _isLoading = false;
-  bool _isFormValid = false;
-  bool _submitted = false;
-  String? _gender;
+class _ProfileViewScreenState extends State<ProfileViewScreen> {
+  bool _isDarkMode = false;
 
   @override
   void initState() {
     super.initState();
-    _firstNameCtrl.addListener(_updateFormValid);
-    _lastNameCtrl.addListener(_updateFormValid);
-    _emailCtrl.addListener(_updateFormValid);
-    _dobCtrl.addListener(_updateFormValid);
+    _isDarkMode = ThemeService.isDarkMode;
   }
 
-  @override
-  void dispose() {
-    _firstNameCtrl.dispose();
-    _lastNameCtrl.dispose();
-    _emailCtrl.dispose();
-    _dobCtrl.dispose();
-    super.dispose();
-  }
-
-  void _updateFormValid() {
-    final emailValid = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_emailCtrl.text.trim());
-    final firstNameValid = RegExp(r'^[A-Za-z]+$').hasMatch(_firstNameCtrl.text.trim());
-    final lastNameValid = _lastNameCtrl.text.trim().isEmpty || RegExp(r'^[A-Za-z]+$').hasMatch(_lastNameCtrl.text.trim());
-    final dobValid = _dobCtrl.text.trim().length == 10; // DD/MM/YYYY
-    final genderValid = (_gender != null && _gender!.isNotEmpty);
-    final valid = emailValid && firstNameValid && lastNameValid && dobValid && genderValid;
-    
-    if (valid != _isFormValid) {
-      setState(() => _isFormValid = valid);
-    }
-  }
-
-  void _trySubmit() {
-    setState(() => _submitted = true);
-    if (_formKey.currentState?.validate() ?? false) {
-      _submitProfile();
-    }
-  }
-
-  void _submitProfile() {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      
-      // Navigate to Main Navigation Screen (with tabs)
-      Navigator.pushReplacementNamed(context, '/home');
+  Future<void> _toggleTheme(bool value) async {
+    setState(() {
+      _isDarkMode = value;
     });
+    
+    await ThemeService.setDarkMode(value);
+    AppColors.setDarkMode(value);
+    
+    // Notify parent to rebuild the entire app
+    if (widget.onThemeChanged != null) {
+      widget.onThemeChanged!();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AuthAppBar(title: 'Profile'),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: AppColors.primaryText,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            color: AppColors.primaryText,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          autovalidateMode: _submitted ? AutovalidateMode.always : AutovalidateMode.disabled,
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(AppDimensions.horizontalMargin),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            _buildProfileHeader(),
+            const SizedBox(height: 30),
+            _buildStatsSection(),
+            const SizedBox(height: 30),
+            _buildSettingsSection(),
+            const SizedBox(height: 30),
+            _buildPreferencesSection(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Stack(
             children: [
-              const Text(
-                'Tell us about yourself!',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.gradientStart,
+                      AppColors.gradientEnd,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.person,
+                  size: 50,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 30),
-              _buildSectionHeader('What do we call you?'),
-              TextFormField(
-                controller: _firstNameCtrl,
-                textCapitalization: TextCapitalization.words,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]')), // only letters, no spaces
-                ],
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'First Name',
-                  hintStyle: TextStyle(color: Color(0xFF8E8E93)),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-                  errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                  focusedErrorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.background, width: 2),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+                    onPressed: _changeProfilePicture,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  ),
                 ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Please fill this field';
-                  if (!RegExp(r'^[A-Za-z]+$').hasMatch(v.trim())) return 'Only letters allowed';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _lastNameCtrl,
-                textCapitalization: TextCapitalization.words,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]')), // only letters, no spaces
-                ],
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'Last Name (optional)',
-                  hintStyle: TextStyle(color: Color(0xFF8E8E93)),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-                  errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                  focusedErrorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return null; // optional
-                  if (!RegExp(r'^[A-Za-z]+$').hasMatch(v.trim())) return 'Only letters allowed';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 30),
-              _buildSectionHeader("What's your email?"),
-              TextFormField(
-                controller: _emailCtrl,
-                keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'abc@example.xyz',
-                  hintStyle: TextStyle(color: Color(0xFF8E8E93)),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-                  errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                  focusedErrorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Please fill this field';
-                  final pattern = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                  if (!pattern.hasMatch(v.trim())) return 'Enter a valid email';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 30),
-              _buildSectionHeader("When's your birthday?"),
-              TextFormField(
-                controller: _dobCtrl,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                  _DateTextInputFormatter(),
-                ],
-                decoration: const InputDecoration(
-                  hintText: 'DD/MM/YYYY',
-                  hintStyle: TextStyle(color: Color(0xFF8E8E93)),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-                  errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                  focusedErrorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Please fill this field';
-                  final text = v.trim();
-                  if (text.length != 10) return 'Enter date as DD/MM/YYYY';
-                  final parts = text.split('/');
-                  if (parts.length != 3) return 'Enter date as DD/MM/YYYY';
-                  final day = int.tryParse(parts[0]);
-                  final month = int.tryParse(parts[1]);
-                  final year = int.tryParse(parts[2]);
-                  if (day == null || month == null || year == null) return 'Enter a valid date';
-                  if (day < 1 || day > 31) return 'Day must be between 01 and 31';
-                  if (month < 1 || month > 12) return 'Month must be between 01 and 12';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 30),
-              _buildSectionHeader('How do you identify?'),
-              DropdownButtonFormField<String>(
-                value: _gender,
-                items: const [
-                  DropdownMenuItem(value: 'Male', child: Text('Male')),
-                  DropdownMenuItem(value: 'Female', child: Text('Female')),
-                  DropdownMenuItem(value: 'Other', child: Text('Other')),
-                ],
-                onChanged: (v) {
-                  setState(() {
-                    _gender = v;
-                    _updateFormValid();
-                  });
-                },
-                decoration: const InputDecoration(
-                  hintText: 'Select',
-                  hintStyle: TextStyle(color: Color(0xFF8E8E93)),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-                  errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                  focusedErrorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-                ),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Please fill this field';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 40),
-              PrimaryButton(
-                text: 'Done',
-                onPressed: () => _trySubmit(),
-                isLoading: _isLoading,
-                color: const Color(0xFF34C759),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          Text(
+            UserDataService.fullName.isNotEmpty ? UserDataService.fullName : 'User Name',
+            style: TextStyle(
+              color: AppColors.primaryText,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            UserDataService.email.isNotEmpty ? UserDataService.email : 'user@example.com',
+            style: TextStyle(
+              color: AppColors.secondaryText,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryBlue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primaryBlue.withOpacity(0.3),
+              ),
+            ),
+            child: Text(
+              'Level 5 Saver',
+              style: TextStyle(
+                color: AppColors.primaryBlue,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
+  void _changeProfilePicture() {
+    // TODO: Implement camera/gallery picker
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Profile picture change coming soon!'),
+        backgroundColor: AppColors.primaryBlue,
       ),
     );
   }
-}
 
-// Custom formatter to insert slashes while typing DDMMYYYY -> DD/MM/YYYY
-class _DateTextInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    var digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.length > 8) digits = digits.substring(0, 8);
-    
-    final buffer = StringBuffer();
-    for (var i = 0; i < digits.length; i++) {
-      buffer.write(digits[i]);
-      if (i == 1 || i == 3) {
-        if (i != digits.length - 1) buffer.write('/');
-      }
-    }
-    
-    final formatted = buffer.toString();
-    // Calculate new cursor position
-    var selectionIndex = formatted.length;
-    
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: selectionIndex),
+  Widget _buildStatsSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Your Stats',
+            style: TextStyle(
+              color: AppColors.primaryText,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.savings,
+                  label: 'Total Savings',
+                  value: '₹15,420',
+                  color: const Color(0xFF4CAF50),
+                ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.track_changes,
+                  label: 'Items Tracked',
+                  value: '24',
+                  color: const Color(0xFF2196F3),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.local_offer,
+                  label: 'Deals Found',
+                  value: '127',
+                  color: const Color(0xFFFF9800),
+                ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.shopping_bag,
+                  label: 'Orders',
+                  value: '15',
+                  color: const Color(0xFF9C27B0),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              color: AppColors.primaryText,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.secondaryText,
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Appearance',
+            style: TextStyle(
+              color: AppColors.primaryText,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildThemeToggle(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.background.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _isDarkMode ? const Color(0xFF2E3B4E) : const Color(0xFFFFD700),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              _isDarkMode ? Icons.dark_mode : Icons.light_mode,
+              color: _isDarkMode ? Colors.white : Colors.black,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _isDarkMode ? 'Dark Mode' : 'Light Mode',
+                  style: TextStyle(
+                    color: AppColors.primaryText,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _isDarkMode ? 'Dark theme is active' : 'Light theme is active',
+                  style: TextStyle(
+                    color: AppColors.secondaryText,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch.adaptive(
+            value: _isDarkMode,
+            onChanged: _toggleTheme,
+            activeColor: AppColors.primaryBlue,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreferencesSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Account Settings',
+            style: TextStyle(
+              color: AppColors.primaryText,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildPreferenceItem(
+            icon: Icons.person_outline,
+            title: 'Edit Profile',
+            subtitle: 'Change name, email, birthday',
+            onTap: _editProfile,
+          ),
+          const SizedBox(height: 12),
+          _buildPreferenceItem(
+            icon: Icons.phone_outlined,
+            title: 'Change Mobile',
+            subtitle: UserDataService.phone.isNotEmpty ? UserDataService.phone : 'Add mobile number',
+            onTap: _changeMobile,
+          ),
+          const SizedBox(height: 12),
+          _buildPreferenceItem(
+            icon: Icons.lock_outline,
+            title: 'Change Password',
+            subtitle: 'Update your password',
+            onTap: _changePassword,
+          ),
+          const SizedBox(height: 12),
+          _buildPreferenceItem(
+            icon: Icons.help_outline,
+            title: 'Help & Support',
+            subtitle: 'Get help with the app',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Help & Support coming soon!')),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _buildPreferenceItem(
+            icon: Icons.logout,
+            title: 'Logout',
+            subtitle: 'Sign out of your account',
+            onTap: _logout,
+            isDestructive: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editProfile() {
+    // TODO: Navigate to profile edit screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Profile edit screen coming soon!')),
+    );
+  }
+
+  void _changeMobile() {
+    // TODO: Implement mobile change functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Mobile change coming soon!')),
+    );
+  }
+
+  void _changePassword() {
+    // TODO: Implement password change functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Password change coming soon!')),
+    );
+  }
+
+  void _logout() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColors.cardBackground,
+          title: Text(
+            'Logout',
+            style: TextStyle(color: AppColors.primaryText),
+          ),
+          content: Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(color: AppColors.secondaryText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.secondaryText),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await UserDataService.clearUserData();
+                if (!mounted) return;
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/',
+                  (route) => false,
+                );
+              },
+              child: Text(
+                'Logout',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPreferenceItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    VoidCallback? onTap,
+    bool isDestructive = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.background.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.secondaryText.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: isDestructive ? Colors.red : AppColors.secondaryText,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: isDestructive ? Colors.red : AppColors.primaryText,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: AppColors.secondaryText,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.secondaryText,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

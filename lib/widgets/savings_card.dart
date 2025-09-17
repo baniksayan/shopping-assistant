@@ -27,7 +27,7 @@ class SavingsCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   AppStrings.savingsTillDate,
                   style: TextStyle(
                     color: AppColors.secondaryText,
@@ -36,7 +36,7 @@ class SavingsCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   AppStrings.savingsAmount,
                   style: TextStyle(
                     color: AppColors.primaryText,
@@ -51,7 +51,7 @@ class SavingsCard extends StatelessWidget {
                     color: AppColors.primaryText,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
+                  child: Text(
                     AppStrings.viewAllVouchers,
                     style: TextStyle(
                       color: AppColors.background,

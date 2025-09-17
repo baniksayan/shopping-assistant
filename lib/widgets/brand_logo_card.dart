@@ -39,7 +39,7 @@ class BrandLogoCard extends StatelessWidget {
             width: 64,
             child: Text(
               name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 color: AppColors.secondaryText,
               ),
